@@ -1,62 +1,88 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rixa - Diamante, Entre Ríos</title>
+    <title>Rixa - Multi Delivery</title>
     <script src="https://sdk.mercadopago.com/js/v2"></script>
     <style>
-        :root { --primary: #FF6600; --dark: #1A1A1A; --bg: #F5F5F5; --white: #FFFFFF; --text: #333333; --gray: #888888; }
+        :root { --primary: #FF6600; --dark: #1A1A1A; --bg: #F5F5F5; --white: #FFFFFF; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { background-color: var(--bg); padding-bottom: 80px; }
-        header { background-color: var(--dark); color: var(--white); padding: 15px 20px; }
-        .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
-        .producto { background: white; padding: 20px; margin: 20px; border-radius: 10px; display: flex; justify-content: space-between; }
-        .cart-floating { position: fixed; bottom: 15px; left: 20px; right: 20px; background: var(--primary); color: var(--white); border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        body { background-color: var(--bg); padding-bottom: 100px; }
+        header { background-color: var(--dark); color: var(--white); padding: 20px; text-align: center; }
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+        .seccion { padding: 20px; }
+        h2 { margin-bottom: 10px; color: var(--dark); border-left: 5px solid var(--primary); padding-left: 10px; }
+        .grilla { display: grid; gap: 15px; }
+        .producto { background: white; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .cart-floating { position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
     </style>
 </head>
 <body>
-    <header><div class="logo">Rixa</div></header>
-    
-    <div class="producto">
-        <span>Pizza Muzzarella - $5000</span>
-        <button onclick="agregarAlCarrito('Pizza Muzzarella', 5000)">Agregar</button>
-    </div>
+    <header><div class="logo">RIXA Delivery</div></header>
+
+    <div id="tienda-container"></div>
 
     <div class="cart-floating" id="checkout-btn">
-        <span>🛒 <span id="cart-count">0</span> items en pedido</span>
-        <span>PAGAR 👉</span>
+        <span>🛒 <span id="cart-count">0</span> productos</span>
+        <strong>PAGAR PEDIDO</strong>
     </div>
 
     <script>
         const mp = new MercadoPago('APP_USR-4fdd2fd5-429a-44d7-9921-d0ae4de0b8d0', { locale: 'es-AR' });
-        let carrito = []; 
+        
+        // Aquí agregamos todos los productos que quieras
+        const productos = [
+            { cat: 'Farmacia', nombre: 'Paracetamol', precio: 1200 },
+            { cat: 'Farmacia', nombre: 'Alcohol en Gel', precio: 800 },
+            { cat: 'Kiosco', nombre: 'Coca Cola 1.5L', precio: 2500 },
+            { cat: 'Kiosco', nombre: 'Chocolate Shot', precio: 1500 },
+            { cat: 'Veterinaria', nombre: 'Alimento Perro 1kg', precio: 4500 },
+            { cat: 'Veterinaria', nombre: 'Pipeta Antipulgas', precio: 6000 }
+        ];
+
+        let carrito = [];
+
+        function renderizarTienda() {
+            const container = document.getElementById('tienda-container');
+            const categorias = [...new Set(productos.map(p => p.cat))];
+            
+            categorias.forEach(cat => {
+                container.innerHTML += `<h2>${cat}</h2><div class="grilla" id="cat-${cat}"></div>`;
+                const catDiv = document.getElementById(`cat-${cat}`);
+                productos.filter(p => p.cat === cat).forEach(p => {
+                    catDiv.innerHTML += `
+                        <div class="producto">
+                            <span>${p.nombre} - $${p.precio}</span>
+                            <button onclick="agregarAlCarrito('${p.nombre}', ${p.precio})">Agregar</button>
+                        </div>`;
+                });
+            });
+        }
 
         function agregarAlCarrito(nombre, precio) {
             carrito.push({ title: nombre, quantity: 1, unit_price: Number(precio) });
             document.getElementById('cart-count').innerText = carrito.length;
-            alert(nombre + " agregado!");
+            alert(nombre + " sumado al pedido");
         }
 
         document.getElementById('checkout-btn').addEventListener('click', async () => {
-            if (carrito.length === 0) {
-                alert("Tu carrito está vacío");
-                return;
-            }
-
+            if (carrito.length === 0) return alert("El carrito está vacío");
+            
             try {
-                const response = await fetch('https://rixa-backend-production.up.railway.app/crear-preferencia', {
+                const res = await fetch('https://rixa-backend-production.up.railway.app/crear-preferencia', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ items: carrito }) 
+                    body: JSON.stringify({ items: carrito })
                 });
-                
-                const data = await response.json();
+                const data = await res.json();
                 window.location.href = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${data.id}`;
-            } catch (error) {
-                alert('Error al conectar con el servidor');
-            }
+            } catch (e) { alert('Error al procesar el pago'); }
         });
+
+        renderizarTienda();
     </script>
 </body>
 </html>
