@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rixa - Diamante, Entre Ríos</title>
+    <style>
+        :root {
+            --primary: #FF6600; /* Naranja vibrante */
+            --dark: #1A1A1A; /* Negro elegante */
+            --bg: #F5F5F5;
+            --white: #FFFFFF;
+            --text: #333333;
+            --gray: #888888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding-bottom: 80px; /* Espacio para el carrito flotante */
+        }
+
+        /* Cabecera */
+        header {
+            background-color: var(--dark);
+            color: var(--white);
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .location {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border-radius: 25px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Banners */
+        .banners-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 15px 20px;
+            gap: 15px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none; /* Oculta scroll en Firefox */
+        }
+        .banners-container::-webkit-scrollbar {
+            display: none; /* Oculta scroll en Chrome/Safari */
+        }
+
+        .banner {
+            min-width: 280px;
+            height: 140px;
+            border-radius: 15px;
+            padding: 20px;
+            color: var(--white);
+            scroll-snap-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .banner-1 { background: linear-gradient(135deg, var(--primary), #FF8C00); }
+        .banner-2 { background: linear-gradient(135deg, #2E7D32, #4CAF50); }
+        .banner-3 { background: linear-gradient(135deg, var(--dark), #444); }
+
+        .banner h3 { font-size: 1.2rem; margin-bottom: 5px; }
+        .banner p { font-size: 0.9rem; opacity: 0.9; }
+
+        /* Categorías */
+        .categories {
+            padding: 0 20px 15px;
+        }
+        .categories h2 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        .cat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .cat-item {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .cat-item:active { transform: scale(0.95); }
+        .cat-icon { font-size: 1.8rem; margin-bottom: 5px; }
+        .cat-name { font-size: 0.8rem; font-weight: 600; }
+
+        /* Lista de Comercios */
+        .stores-section {
+            padding: 0 20px;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            margin: 10px 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .store-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+        }
+
+        .store-img {
+            width: 80px;
+            height: 80px;
+            background-color: #EEE;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .store-info {
+            flex: 1;
+        }
+
+        .store-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .store-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+        .badge-rating { background: #FFF3E0; color: #E65100; }
+        .badge-shipping { background: #E8F5E9; color: #2E7D32; }
+        .badge-promo { background: #FFEBEE; color: #C62828; }
+
+        .store-details {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .store-status {
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .status-open { color: #2E7D32; }
+        .status-closed { color: #C62828; }
+
+        /* Carrito Flotante */
+        .cart-floating {
+            position: fixed;
+            bottom: 15px;
+            left: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(255, 102, 0, 0.3);
+            font-weight: 700;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        
+        .footer-note {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 20px;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cabecera y Buscador -->
+    <header>
+        <div class="header-top">
+            <div class="logo">Rixa</div>
+            <div class="location">📍 Diamante, Entre Ríos</div>
+        </div>
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Buscar empanadas, postres, farmacia..." onkeyup="filtrarComercios()">
+        </div>
+    </header>
+
+    <!-- Banners Deslizables -->
+    <div class="banners-container" id="bannerContainer">
+        <div class="banner banner-1">
+            <h3>🔥 Envío Gratis</h3>
+            <p>En locales seleccionados hoy</p>
+        </div>
+        <div class="banner banner-2">
+            <h3>💊 Farmacias</h3>
+            <p>Medicamentos a domicilio</p>
+        </div>
+        <div class="banner banner-3">
+            <h3>🏪 Sumá tu local</h3>
+            <p>Diamante en un tap</p>
+        </div>
+    </div>
+
+    <!-- Grilla de Categorías -->
+    <section class="categories">
+        <h2>Categorías</h2>
+        <div class="cat-grid">
+            <div class="cat-item" onclick="filtrarPorCategoria('Todos')">
+                <div class="cat-icon">🏪</div>
+                <div class="cat-name">Todos</div>
+            </div>
+            <div class="cat-item" onclick="filtrarPorCategoria('Comida')">
+                <div class="cat-icon">🍔</div>
+                <div class="cat-name">Comida</div>
+            </div>
+            <div class="cat-item" onclick="filtrarPorCategoria('Postres')">
+                <div class="cat-icon">🍰</div>
+                <div class="cat-name">Postres</div>
+            </div>
+            <div class="cat-item" onclick="filtrarPorCategoria('Farmacia')">
+                <div class="cat-icon">💊</div>
+                <div class="cat-name">Farmacia</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lista de Comercios -->
+    <section class="stores-section">
+        <div class="section-title">
+            <span>Comercios disponibles</span>
+            <span style="font-size: 0.9rem; color: var(--primary);">Ver todos</span>
+        </div>
+        
+        <div id="storesContainer">
+            <!-- Los comercios se cargan acá con JavaScript -->
+        </div>
+    </section>
+
+    <div class="footer-note">
+        Hecho con ❤️ para Diamante · Rixa v2.5
+    </div>
+
+    <!-- Carrito Flotante (Simulado) -->
+    <div class="cart-floating" onclick="alert('Próximamente: Acá se abrirá tu pedido para pagar con Mercado Pago!')">
+        <span>🛒 0 items</span>
+        <span>Ver pedido 👉</span>
+    </div>
+
+    <script>
+        // Datos de los comercios
+        const comercios = [
+            {
+                nombre: "El Rey de la Pizza",
+                categoria: "Comida",
+                icono: "🍕",
+                rating: "4.8",
+                envioGratis: true,
+                tiempo: "30-45 min",
+                minimo: "$4000",
+                apertura: 19,
+                cierre: 24,
+                tags: ["pizza", "empanadas", "cena"]
+            },
+            {
+                nombre: "Tartas & Lemon Pie Diamante",
+                categoria: "Postres",
+                icono: "🍋",
+                rating: "5.0",
+                envioGratis: false,
+                tiempo: "Por encargo / 20 min",
+                minimo: "$3500",
+                apertura: 9, 
+                cierre: 20, 
+                tags: ["tarta", "frutal", "lemon pie", "dulce", "postre", "merienda"]
+            },
+            {
+                nombre: "Hamburguesas Central",
+                categoria: "Comida",
+                icono: "🍔",
+                rating: "4.5",
+                envioGratis: false,
+                tiempo: "40-55 min",
+                minimo: "$5000",
+                apertura: 20,
+                cierre: 23,
+                tags: ["hamburguesa", "papas", "cheddar"]
+            },
+            {
+                nombre: "Farmacia del Centro",
+                categoria: "Farmacia",
+                icono: "💊",
+                rating: "4.9",
+                envioGratis: true,
+                tiempo: "15-25 min",
+                minimo: "$2000",
+                apertura: 8,
+                cierre: 22,
+                tags: ["remedios", "salud", "perfumeria"]
+            }
+        ];
+
+        // Función para saber si está abierto leyendo la hora real del celular
+        function obtenerEstado(apertura, cierre) {
+            const horaActual = new Date().getHours();
+            let abierto = false;
+            
+            if (cierre > apertura) {
+                abierto = horaActual >= apertura && horaActual < cierre;
+            } else {
+                abierto = horaActual >= apertura || horaActual < cierre;
+            }
+
+            if (abierto) {
+                return '<span class="store-status status-open">🟢 Abierto ahora</span>';
+            } else {
+                return '<span class="store-status status-closed">🔴 Cerrado (Abre a las '+apertura+':00)</span>';
+            }
+        }
+
+        // Función para dibujar los comercios en la pantalla
+        function renderizarComercios(lista) {
+            const container = document.getElementById('storesContainer');
+            container.innerHTML = '';
+
+            if(lista.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">No encontramos comercios con esa búsqueda 😔</p>';
+                return;
+            }
+
+            lista.forEach(comercio => {
+                let badgesHTML = '<span class="badge badge-rating">⭐ ' + comercio.rating + '</span>';
+                if(comercio.envioGratis) badgesHTML += '<span class="badge badge-shipping">🛵 Envío Gratis</span>';
+                if(comercio.nombre.includes("Lemon")) badgesHTML += '<span class="badge badge-promo">🔥 Recomendado</span>';
+
+                const cardHTML = `
+                    <div class="store-card">
+                        <div class="store-img">${comercio.icono}</div>
+                        <div class="store-info">
+                            <div class="store-header">
+                                <h3 class="store-name">${comercio.nombre}</h3>
+                            </div>
+                            <div class="badges">
+                                ${badgesHTML}
+                            </div>
+                            <div class="store-details">
+                                ⏱ ${comercio.tiempo} • Mínimo ${comercio.minimo}
+                            </div>
+                            ${obtenerEstado(comercio.apertura, comercio.cierre)}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+        }
+
+        // Buscador por texto
+        function filtrarComercios() {
+            const texto = document.getElementById('searchInput').value.toLowerCase();
+            const filtrados = comercios.filter(c => 
+                c.nombre.toLowerCase().includes(texto) || 
+                c.tags.some(tag => tag.includes(texto))
+            );
+            renderizarComercios(filtrados);
+        }
+
+        // Filtro por categoría (botones)
+        function filtrarPorCategoria(categoria) {
+            if (categoria === 'Todos') {
+                renderizarComercios(comercios);
+            } else {
+                const filtrados = comercios.filter(c => c.categoria === categoria);
+                renderizarComercios(filtrados);
+            }
+            document.getElementById('searchInput').value = '';
+        }
+
+        // Auto-scroll de los banners (Carrusel automático)
+        function iniciarCarrusel() {
+            const bannerContainer = document.getElementById('bannerContainer');
+            setInterval(() => {
+                const maxScroll = bannerContainer.scrollWidth - bannerContainer.clientWidth;
+                if (bannerContainer.scrollLeft >= maxScroll - 10) {
+                    bannerContainer.scrollTo({ left: 0, behavior: 'smooth' }); 
+                } else {
+                    bannerContainer.scrollBy({ left: 300, behavior: 'smooth' }); 
+                }
+            }, 3500);
+        }
+
+        // Arrancar la app cuando carga la página
+        window.onload = () => {
+            renderizarComercios(comercios);
+            iniciarCarrusel();
+        };
+    </script>
+</body>
+</html>
