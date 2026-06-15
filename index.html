@@ -332,9 +332,10 @@
 
     /* ─── AUTH SCREEN ─── */
     #screen-auth {
-      display: flex; flex-direction: column; justify-content: flex-end;
+      flex-direction: column; justify-content: flex-end;
       min-height: 100vh; padding-bottom: 0;
     }
+    #screen-auth.active { display: flex; }
     .auth-bg {
       position: fixed; inset: 0; background: var(--dark);
       display: flex; align-items: center; justify-content: center;
@@ -1060,14 +1061,47 @@ function getQtyCtrl(item, store) {
   const cartItem = state.cart.find(c => c.id === item.id);
   const qty = cartItem ? cartItem.qty : 0;
   if (qty === 0) {
-    return `<button class="qty-btn primary" onclick="addToCart('${item.id}','${item.n}',${item.p},'${item.emoji}','${store.name}')">+</button>`;
+    return `<button class="qty-btn primary" data-action="add" data-id="${item.id}" data-store="${store.id}">+</button>`;
   }
   return `
-    <button class="qty-btn" onclick="removeFromCart('${item.id}')">−</button>
+    <button class="qty-btn" data-action="remove" data-id="${item.id}">−</button>
     <span class="qty-num">${qty}</span>
-    <button class="qty-btn primary" onclick="addToCart('${item.id}','${item.n}',${item.p},'${item.emoji}','${store.name}')">+</button>
+    <button class="qty-btn primary" data-action="add" data-id="${item.id}" data-store="${store.id}">+</button>
   `;
 }
+
+// Central click handler for store items — avoids inline onclick string escaping bugs
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  const id = btn.dataset.id;
+  if (action === 'add') {
+    const storeId = btn.dataset.store;
+    const store = STORES.find(s => s.id === storeId);
+    if (!store) return;
+    const item = store.items.find(i => i.id === id);
+    if (!item) return;
+    const existing = state.cart.find(c => c.id === id);
+    if (existing) { existing.qty++; }
+    else { state.cart.push({ id, name: item.n, price: item.p, qty: 1, emoji: item.emoji, store: store.name }); }
+    updateCartBadge();
+    updateCartFloat();
+    filterHome();
+    showToast(`${item.emoji} ${item.n} agregado`);
+  } else if (action === 'cart-add') {
+    const existing = state.cart.find(c => c.id === id);
+    if (existing) { existing.qty++; updateCartBadge(); updateCartFloat(); renderCart(); }
+  } else if (action === 'remove') {
+    const idx = state.cart.findIndex(c => c.id === id);
+    if (idx === -1) return;
+    if (state.cart[idx].qty > 1) { state.cart[idx].qty--; }
+    else { state.cart.splice(idx, 1); }
+    updateCartBadge();
+    updateCartFloat();
+    if (state.currentScreen === 'cart') { renderCart(); } else { filterHome(); }
+  }
+});
 
 function filterCat(btn, cat) {
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -1092,8 +1126,7 @@ function addToCart(id, name, price, emoji, store) {
   else { state.cart.push({ id, name, price, qty: 1, emoji, store }); }
   updateCartBadge();
   updateCartFloat();
-  filterHome(); // re-render controls
-  showToast(`${emoji} ${name} agregado`);
+  renderCart();
 }
 
 function removeFromCart(id) {
@@ -1103,7 +1136,7 @@ function removeFromCart(id) {
   else { state.cart.splice(idx, 1); }
   updateCartBadge();
   updateCartFloat();
-  filterHome();
+  renderCart();
 }
 
 function cartTotal() {
@@ -1151,9 +1184,9 @@ function renderCart() {
         <div class="cart-item-price">${item.store} · $${item.price.toLocaleString('es-AR')} c/u</div>
       </div>
       <div class="qty-ctrl">
-        <button class="qty-btn" onclick="removeFromCart('${item.id}');renderCart()">−</button>
+        <button class="qty-btn" data-action="remove" data-id="${item.id}">−</button>
         <span class="qty-num">${item.qty}</span>
-        <button class="qty-btn primary" onclick="addToCart('${item.id}','${item.name}',${item.price},'${item.emoji}','${item.store}');renderCart()">+</button>
+        <button class="qty-btn primary" data-action="cart-add" data-id="${item.id}">+</button>
       </div>
     </div>
   `).join('');
