@@ -6,33 +6,49 @@
     <title>Rixa - Diamante, Entre Ríos</title>
     <script src="https://sdk.mercadopago.com/js/v2"></script>
     <style>
-        /* Mantené aquí todo tu CSS original que ya tenías */
         :root { --primary: #FF6600; --dark: #1A1A1A; --bg: #F5F5F5; --white: #FFFFFF; --text: #333333; --gray: #888888; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { background-color: var(--bg); padding-bottom: 80px; }
         header { background-color: var(--dark); color: var(--white); padding: 15px 20px; }
         .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        .producto { background: white; padding: 20px; margin: 20px; border-radius: 10px; display: flex; justify-content: space-between; }
         .cart-floating { position: fixed; bottom: 15px; left: 20px; right: 20px; background: var(--primary); color: var(--white); border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
     </style>
 </head>
 <body>
     <header><div class="logo">Rixa</div></header>
     
+    <div class="producto">
+        <span>Pizza Muzzarella - $5000</span>
+        <button onclick="agregarAlCarrito('Pizza Muzzarella', 5000)">Agregar</button>
+    </div>
+
     <div class="cart-floating" id="checkout-btn">
-        <span>🛒 Pagar Pedido</span>
-        <span>👉</span>
+        <span>🛒 <span id="cart-count">0</span> items en pedido</span>
+        <span>PAGAR 👉</span>
     </div>
 
     <script>
         const mp = new MercadoPago('APP_USR-4fdd2fd5-429a-44d7-9921-d0ae4de0b8d0', { locale: 'es-AR' });
+        let carrito = []; 
+
+        function agregarAlCarrito(nombre, precio) {
+            carrito.push({ title: nombre, quantity: 1, unit_price: Number(precio) });
+            document.getElementById('cart-count').innerText = carrito.length;
+            alert(nombre + " agregado!");
+        }
 
         document.getElementById('checkout-btn').addEventListener('click', async () => {
+            if (carrito.length === 0) {
+                alert("Tu carrito está vacío");
+                return;
+            }
+
             try {
-                // Aquí llamamos a tu backend en Railway
                 const response = await fetch('https://rixa-backend-production.up.railway.app/crear-preferencia', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ items: [{ title: 'Pedido Rixa', quantity: 1, unit_price: 1000 }] })
+                    body: JSON.stringify({ items: carrito }) 
                 });
                 
                 const data = await response.json();
